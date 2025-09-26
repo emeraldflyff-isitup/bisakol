@@ -1,5 +1,3 @@
-# bisakol
-unsa?
 # Emerald Flyff Patch Checker
 
 Check if patch 91 is available for Emerald Flyff.
