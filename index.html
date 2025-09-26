@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emerald Flyff Patch Checker</title>
+    <title>Chloe big dick pinoy</title>
     <style>
         body {
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -116,21 +116,19 @@
 </head>
 <body>
     <div class="card">
-        <h1>./.</h1>
-        <p class="subtitle">check</p>
+        <h1>M2 Patch Checker</h1>
         
         <div class="url-display">
             <strong>Checking:</strong> https://patch.emeraldflyff.com/91/
         </div>
         
         <div>
-            <button id="checkBtn">check patch</button>
             <button id="autoCheckBtn">auto check</button>
         </div>
         
         <div class="msg info" id="result">
             <span class="status-indicator status-pending"></span>
-            Click "Check Patch Status" to begin
+            Click "auto check" to begin
         </div>
         
         <div class="small" id="details">
@@ -157,64 +155,49 @@
         }
 
         async function checkPatch() {
-            const btn = document.getElementById("checkBtn");
             const autoBtn = document.getElementById("autoCheckBtn");
+            const resultEl = document.getElementById("result");
             
-            btn.disabled = true;
             autoBtn.disabled = true;
             updateUI("Checking patch status...", 'info', 'This may take a few seconds');
             resultEl.classList.add('loading');
 
             try {
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(TARGET_URL)}`;
+                const proxyUrl = `https://cors-anywhere.herokuapp.com/${TARGET_URL}`;
                 const response = await fetch(proxyUrl, {
                     method: "GET",
                     headers: {
-                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                        'X-Requested-With': 'XMLHttpRequest'
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const text = await response.text();
-                
-                if (response.status === 404 || contains404Phrase(text)) {
+                if (response.status === 404) {
                     updateUI(
-                        "there is not yet", 
+                        "no patch yet", 
                         'error', 
                         `Patch 91 is not available yet. Checked at ${new Date().toLocaleTimeString()}`
                     );
-                } else {
+                } else if (response.ok) {
                     updateUI(
                         "go spam tractor", 
                         'success', 
                         `Patch 91 is available! Checked at ${new Date().toLocaleTimeString()}`
                     );
+                } else {
+                    updateUI(
+                        "no patch yet", 
+                        'error', 
+                        `Patch 91 is not available yet. Checked at ${new Date().toLocaleTimeString()}`
+                    );
                 }
                 
             } catch (err) {
-                try {
-                    const directResponse = await fetch(TARGET_URL, { 
-                        method: "HEAD",
-                        mode: 'no-cors'
-                    });
-                    
-                    updateUI(
-                        "go spam tractor (direct check)", 
-                        'success', 
-                        `Patch appears to be available. Checked at ${new Date().toLocaleTimeString()}`
-                    );
-                } catch (directErr) {
-                    updateUI(
-                        "there is not yet (direct check)", 
-                        'error', 
-                        `Patch 91 is not available. Checked at ${new Date().toLocaleTimeString()}`
-                    );
-                }
+                updateUI(
+                    "no patch yet", 
+                    'error', 
+                    `Patch 91 is not available yet. Checked at ${new Date().toLocaleTimeString()}`
+                );
             } finally {
-                btn.disabled = false;
                 autoBtn.disabled = false;
                 resultEl.classList.remove('loading');
             }
@@ -226,17 +209,16 @@
             if (autoCheckInterval) {
                 clearInterval(autoCheckInterval);
                 autoCheckInterval = null;
-                autoBtn.textContent = "🔄 Auto Check (30s)";
+                autoBtn.textContent = "auto check";
                 autoBtn.style.background = "linear-gradient(135deg, #4299e1, #3182ce)";
             } else {
                 autoCheckInterval = setInterval(checkPatch, 30000);
-                autoBtn.textContent = "⏹️ Stop Auto Check";
+                autoBtn.textContent = "stop auto check";
                 autoBtn.style.background = "linear-gradient(135deg, #e53e3e, #c53030)";
                 checkPatch();
             }
         }
 
-        document.getElementById("checkBtn").addEventListener("click", checkPatch);
         document.getElementById("autoCheckBtn").addEventListener("click", toggleAutoCheck);
     </script>
 </body>
