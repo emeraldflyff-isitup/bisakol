@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emerald Flyff Patch Checker</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .card {
+            background: #fff;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            color: #2d3748;
+            margin-bottom: 8px;
+            font-size: 2.5rem;
+        }
+        .subtitle {
+            color: #718096;
+            margin-bottom: 32px;
+            font-size: 1.1rem;
+        }
+        .url-display {
+            background: #f7fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #4a5568;
+            border-left: 4px solid #4299e1;
+        }
+        button {
+            padding: 14px 28px;
+            border-radius: 8px;
+            border: none;
+            background: linear-gradient(135deg, #4299e1, #3182ce);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s;
+            margin: 8px;
+        }
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .msg {
+            margin-top: 24px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            padding: 16px;
+            border-radius: 8px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
+        }
+        .info {
+            background: #bee3f8;
+            color: #2b6cb0;
+            border: 1px solid #90cdf4;
+        }
+        .small {
+            margin-top: 16px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending { background: #fbb6ce; }
+        .status-error { background: #f56565; }
+        .status-success { background: #48bb78; }
+        .loading {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>./.</h1>
+        <p class="subtitle">check</p>
+        
+        <div class="url-display">
+            <strong>Checking:</strong> https://patch.emeraldflyff.com/91/
+        </div>
+        
+        <div>
+            <button id="checkBtn">check patch</button>
+            <button id="autoCheckBtn">auto check</button>
+        </div>
+        
+        <div class="msg info" id="result">
+            <span class="status-indicator status-pending"></span>
+            Click "Check Patch Status" to begin
+        </div>
+        
+        <div class="small" id="details">
+            this tool is made by someone with big dick
+        </div>
+    </div>
+
+    <script>
+        const TARGET_URL = "https://patch.emeraldflyff.com/91/";
+        let autoCheckInterval = null;
+
+        function contains404Phrase(text) {
+            if (!text) return false;
+            return text.includes("404 - File or directory not found.");
+        }
+
+        function updateUI(message, type = 'info', details = '') {
+            const resultEl = document.getElementById("result");
+            const detailsEl = document.getElementById("details");
+            
+            resultEl.textContent = message;
+            resultEl.className = `msg ${type}`;
+            detailsEl.textContent = details;
+        }
+
+        async function checkPatch() {
+            const btn = document.getElementById("checkBtn");
+            const autoBtn = document.getElementById("autoCheckBtn");
+            
+            btn.disabled = true;
+            autoBtn.disabled = true;
+            updateUI("Checking patch status...", 'info', 'This may take a few seconds');
+            resultEl.classList.add('loading');
+
+            try {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(TARGET_URL)}`;
+                const response = await fetch(proxyUrl, {
+                    method: "GET",
+                    headers: {
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const text = await response.text();
+                
+                if (response.status === 404 || contains404Phrase(text)) {
+                    updateUI(
+                        "there is not yet", 
+                        'error', 
+                        `Patch 91 is not available yet. Checked at ${new Date().toLocaleTimeString()}`
+                    );
+                } else {
+                    updateUI(
+                        "go spam tractor", 
+                        'success', 
+                        `Patch 91 is available! Checked at ${new Date().toLocaleTimeString()}`
+                    );
+                }
+                
+            } catch (err) {
+                try {
+                    const directResponse = await fetch(TARGET_URL, { 
+                        method: "HEAD",
+                        mode: 'no-cors'
+                    });
+                    
+                    updateUI(
+                        "go spam tractor (direct check)", 
+                        'success', 
+                        `Patch appears to be available. Checked at ${new Date().toLocaleTimeString()}`
+                    );
+                } catch (directErr) {
+                    updateUI(
+                        "there is not yet (direct check)", 
+                        'error', 
+                        `Patch 91 is not available. Checked at ${new Date().toLocaleTimeString()}`
+                    );
+                }
+            } finally {
+                btn.disabled = false;
+                autoBtn.disabled = false;
+                resultEl.classList.remove('loading');
+            }
+        }
+
+        function toggleAutoCheck() {
+            const autoBtn = document.getElementById("autoCheckBtn");
+            
+            if (autoCheckInterval) {
+                clearInterval(autoCheckInterval);
+                autoCheckInterval = null;
+                autoBtn.textContent = "🔄 Auto Check (30s)";
+                autoBtn.style.background = "linear-gradient(135deg, #4299e1, #3182ce)";
+            } else {
+                autoCheckInterval = setInterval(checkPatch, 30000);
+                autoBtn.textContent = "⏹️ Stop Auto Check";
+                autoBtn.style.background = "linear-gradient(135deg, #e53e3e, #c53030)";
+                checkPatch();
+            }
+        }
+
+        document.getElementById("checkBtn").addEventListener("click", checkPatch);
+        document.getElementById("autoCheckBtn").addEventListener("click", toggleAutoCheck);
+    </script>
+</body>
+</html>
